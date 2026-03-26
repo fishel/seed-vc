@@ -59,10 +59,10 @@ class FT_Dataset(torch.utils.data.Dataset):
             return self.__getitem__(random.randint(0, len(self)))
         len_speech = len(speech)
         if len_speech < self.sr * duration_setting["min"] or len_speech > self.sr * duration_setting["max"]:
-            print(f"Audio {wav_path} is too short or too long ({len_speech} / {self.sr * duration_setting["min"]} / {self.sr * duration_setting["max"]}), skipping")
+            #print(f"Audio {wav_path} is too short or too long ({len_speech} / {self.sr * duration_setting["min"]} / {self.sr * duration_setting["max"]}), skipping")
             return self.__getitem__(random.randint(0, len(self)))
-        else:
-            print(f"Audio {wav_path} is all good ({len_speech} / {self.sr * duration_setting["min"]} / {self.sr * duration_setting["max"]})")
+        #else:
+        #    print(f"Audio {wav_path} is all good ({len_speech} / {self.sr * duration_setting["min"]} / {self.sr * duration_setting["max"]})")
         if orig_sr != self.sr:
             speech = librosa.resample(speech, orig_sr, self.sr)
 
