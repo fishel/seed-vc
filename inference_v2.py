@@ -5,6 +5,7 @@ import yaml
 import soundfile as sf
 import time
 from modules.commons import str2bool
+from os.path import isdir, isfile
 
 # Set up device and torch configurations
 if torch.cuda.is_available():
@@ -73,7 +74,24 @@ def convert_voice_v2(source_audio_path, target_audio_path, args):
     # Collect all outputs from the generator
     for output in generator:
         _, full_audio = output
-    return full_audio
+    result = full_audio
+
+    if result is None:
+        raise Exception("Error: Failed to convert voice")
+    return result
+
+
+def save_it(converted_audio, src_file, tgt_file, args):
+    # Save the converted audio
+    source_name = os.path.basename(src_file).split(".")[0]
+    target_name = os.path.basename(tgt_file).split(".")[0]
+
+    # Create a descriptive filename
+    filename = f"{source_name}_vcv2_{target_name}.wav"
+
+    output_path = os.path.join(args.output, filename)
+    save_sr, converted_audio = converted_audio
+    sf.write(output_path, converted_audio, save_sr)
 
 
 def main(args):
@@ -81,27 +99,18 @@ def main(args):
     os.makedirs(args.output, exist_ok=True)
 
     start_time = time.time()
-    converted_audio = convert_voice_v2(args.source, args.target, args)
+    if isdir(args.source):
+        for src_file in os.listdir(args.source):
+            if isfile(src_file):
+                converted_audio = convert_voice_v2(src_file, args.target, args)
+                save_it(converted_audio, src_file, args.target, args)
+    else:
+        converted_audio = convert_voice_v2(args.source, args.target, args)
+        save_it(converted_audio, args.source, args.target, args)
     end_time = time.time()
 
-    if converted_audio is None:
-        print("Error: Failed to convert voice")
-        return
-
-    # Save the converted audio
-    source_name = os.path.basename(args.source).split(".")[0]
-    target_name = os.path.basename(args.target).split(".")[0]
-
-    # Create a descriptive filename
-    filename = f"vc_v2_{source_name}_{target_name}_{args.length_adjust}_{args.diffusion_steps}_{args.similarity_cfg_rate}.wav"
-
-    output_path = os.path.join(args.output, filename)
-    save_sr, converted_audio = converted_audio
-    sf.write(output_path, converted_audio, save_sr)
-
-    print(f"Voice conversion completed in {end_time - start_time:.2f} seconds")
-    print(f"Output saved to: {output_path}")
-
+    print(f"Converted all in {end_time-start_time} time")
+        
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice Conversion Inference Script")
