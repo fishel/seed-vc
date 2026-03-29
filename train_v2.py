@@ -225,17 +225,11 @@ class Trainer:
         waves_16k = torchaudio.functional.resample(waves, self.sr, 16000)
         wave_lengths_16k = (wave_lens.float() * 16000 / self.sr).long()
 
-        waves_16k_dev = waves_16k.to(self.device)
-        mels_dev = mels.to(self.device)
-
-        waves_16k_dev.requires_grad_()
-        mels_dev.requires_grad_()
-
         # Forward pass and loss calculation
         with self.accelerator.autocast():
             loss_ar, loss_cfm = self.model(
-                waves_16k_dev,
-                mels_dev,
+                waves_16k.to(self.device),
+                mels.to(self.device),
                 wave_lengths_16k.to(self.device),
                 mel_lens.to(self.device),
                 forward_ar=self.train_ar,
