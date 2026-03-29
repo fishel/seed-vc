@@ -47,7 +47,7 @@ class AstralQuantizer(torch.nn.Module):
         ssl_fn = self.ssl_model if self.ssl_model else ssl_model
         assert ssl_fn is not None, "In case in-class SSL model loading is skipped, external ssl_model must be provided"
         waves_16k_input_list = [
-            waves_16k[bib, :wave_16k_lens[bib]].detach().cpu().numpy()
+            waves_16k[bib, :wave_16k_lens[bib]].cpu().numpy()
             for bib in range(len(waves_16k))
         ]
         alt_inputs = self.ssl_feature_extractor(
