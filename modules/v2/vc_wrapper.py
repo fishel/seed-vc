@@ -61,7 +61,7 @@ class VoiceConversionWrapper(torch.nn.Module):
         prompt_len_max = mel_lens - 1
         prompt_len = (torch.rand([B], device=device) * prompt_len_max).floor().to(dtype=torch.long)
         prompt_len[torch.rand([B], device=device) < 0.1] = 0
-
+        mels.requires_grad_()
         loss = self.cfm(mels, mel_lens, prompt_len, cond, style_vectors)
         return loss
 
