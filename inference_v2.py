@@ -101,10 +101,13 @@ def main(args):
     start_time = time.time()
     if isdir(args.source):
         for src_file in os.listdir(args.source):
-            if isfile(src_file):
-                converted_audio = convert_voice_v2(os.path.join(args.source, src_file), args.target, args)
+            src_path = os.path.join(args.source, src_file)
+            if isfile(src_path):
+                print(f"Converting {args.source} / {src_file} to {args.target}")
+                converted_audio = convert_voice_v2(src_path, args.target, args)
                 save_it(converted_audio, src_file, args.target, args)
     else:
+        print(f"Converting {args.source} to {args.target}")
         converted_audio = convert_voice_v2(args.source, args.target, args)
         save_it(converted_audio, args.source, args.target, args)
     end_time = time.time()
