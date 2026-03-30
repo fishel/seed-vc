@@ -102,7 +102,7 @@ def main(args):
     if isdir(args.source):
         for src_file in os.listdir(args.source):
             if isfile(src_file):
-                converted_audio = convert_voice_v2(src_file, args.target, args)
+                converted_audio = convert_voice_v2(os.path.join(args.source, src_file), args.target, args)
                 save_it(converted_audio, src_file, args.target, args)
     else:
         converted_audio = convert_voice_v2(args.source, args.target, args)
