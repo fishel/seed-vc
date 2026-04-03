@@ -117,9 +117,13 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
             output_path = get_output_path(path, tgt_path, params.output)
 
             if os.path.exists(output_path):
-                print(f"Skipping {output_path}, already exists")
+                print(f"Skipping {path}, output {output_path} already exists")
             else:
-                convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
+                try:
+                    convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
+                except:
+                    print(f"Caught an exception on {path}, skipping")
+
 
 def main(args):
     acc = Accelerator()
