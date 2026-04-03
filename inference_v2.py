@@ -4,6 +4,8 @@ import torch
 import yaml
 import soundfile as sf
 import time
+
+from accelerate import Accelerator
 from modules.commons import str2bool
 from os.path import isdir, isfile
 
@@ -81,7 +83,7 @@ def convert_voice_v2(source_audio_path, target_audio_path, args):
     return result
 
 
-def save_it(converted_audio, src_file, tgt_file, args):
+def save_it(converted_audio, src_file, tgt_file, output_dir):
     # Save the converted audio
     source_name = os.path.basename(src_file).split(".")[0]
     target_name = os.path.basename(tgt_file).split(".")[0]
@@ -89,27 +91,39 @@ def save_it(converted_audio, src_file, tgt_file, args):
     # Create a descriptive filename
     filename = f"{source_name}_vcv2_{target_name}.wav"
 
-    output_path = os.path.join(args.output, filename)
+    output_path = os.path.join(output_dir, filename)
     save_sr, converted_audio = converted_audio
     sf.write(output_path, converted_audio, save_sr)
 
 
+def convert_and_save_file(src_path, tgt_path, params, proc_idx=None):
+    print(f"Converting {src_path} to {tgt_path}" + ("" if proc_idx is None else f", proc {proc_idx}"))
+    converted_audio = convert_voice_v2(src_path, tgt_path, params)
+    save_it(converted_audio, src_path, tgt_path, params.output)
+
+
+def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
+    paths = sorted([os.path.join(dir_path, src_file)
+                    for src_file in os.listdir(dir_path)
+                    if isfile(os.path.join(dir_path, src_file))])
+
+    for i, path in enumerate(paths):
+        if acc is not None and i % acc.num_processes == acc.local_process_index:
+            convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
+
 def main(args):
+    acc = Accelerator()
+
+
     # Create output directory if it doesn't exist
     os.makedirs(args.output, exist_ok=True)
 
     start_time = time.time()
+
     if isdir(args.source):
-        for src_file in os.listdir(args.source):
-            src_path = os.path.join(args.source, src_file)
-            if isfile(src_path):
-                print(f"Converting {args.source} / {src_file} to {args.target}")
-                converted_audio = convert_voice_v2(src_path, args.target, args)
-                save_it(converted_audio, src_file, args.target, args)
+        convert_and_save_dir(args.source, args.target, args, acc)
     else:
-        print(f"Converting {args.source} to {args.target}")
-        converted_audio = convert_voice_v2(args.source, args.target, args)
-        save_it(converted_audio, args.source, args.target, args)
+        convert_and_save_file(args.source, args.target, args)
     end_time = time.time()
 
     print(f"Converted all in {end_time-start_time} time")
