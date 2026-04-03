@@ -83,15 +83,20 @@ def convert_voice_v2(source_audio_path, target_audio_path, args):
     return result
 
 
+def get_output_path(src, tgt, dir):
+    filename = f"{src}_vcv2_{tgt}.wav"
+    output_path = os.path.join(dir, filename)
+    return output_path
+
+
 def save_it(converted_audio, src_file, tgt_file, output_dir):
     # Save the converted audio
     source_name = os.path.basename(src_file).split(".")[0]
     target_name = os.path.basename(tgt_file).split(".")[0]
 
     # Create a descriptive filename
-    filename = f"{source_name}_vcv2_{target_name}.wav"
+    output_path = get_output_path(source_name, target_name, output_dir)
 
-    output_path = os.path.join(output_dir, filename)
     save_sr, converted_audio = converted_audio
     sf.write(output_path, converted_audio, save_sr)
 
@@ -109,7 +114,12 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
 
     for i, path in enumerate(paths):
         if acc is not None and i % acc.num_processes == acc.local_process_index:
-            convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
+            output_path = get_output_path(path, tgt_path, params.output)
+
+            if os.path.exists(output_path):
+                print(f"Skipping {output_path}, already exists")
+            else:
+                convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
 
 def main(args):
     acc = Accelerator()
