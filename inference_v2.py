@@ -102,7 +102,7 @@ def save_it(converted_audio, src_file, tgt_file, output_dir):
 
 
 def convert_and_save_file(src_path, tgt_path, params, proc_idx=None):
-    print(f"Converting {src_path} to {tgt_path}" + ("" if proc_idx is None else f", proc {proc_idx}"))
+    print(f"REPORT Converting {src_path} to {tgt_path}" + ("" if proc_idx is None else f", proc {proc_idx}"))
     converted_audio = convert_voice_v2(src_path, tgt_path, params)
     save_it(converted_audio, src_path, tgt_path, params.output)
 
@@ -117,17 +117,18 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
             output_path = get_output_path(path, tgt_path, params.output)
 
             if os.path.exists(output_path):
-                print(f"Skipping {path}, output {output_path} already exists")
+                print(f"REPORT Skipping {path}, output {output_path} already exists")
             else:
                 try:
                     convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
                 except:
-                    print(f"Caught an exception on {path}, skipping")
+                    print(f"REPORT Caught an exception on {path}, skipping")
+
+    return len(paths)
 
 
 def main(args):
     acc = Accelerator()
-
 
     # Create output directory if it doesn't exist
     os.makedirs(args.output, exist_ok=True)
@@ -135,12 +136,15 @@ def main(args):
     start_time = time.time()
 
     if isdir(args.source):
-        convert_and_save_dir(args.source, args.target, args, acc)
+        num = convert_and_save_dir(args.source, args.target, args, acc)
     else:
         convert_and_save_file(args.source, args.target, args)
+        num = 1
     end_time = time.time()
 
-    print(f"Converted all in {end_time-start_time} time")
+    len = end_time - start_time
+
+    print(f"REPORT Converted all {num} files in {len} time; average time per file: {len / num}")
         
 
 if __name__ == "__main__":
