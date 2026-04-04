@@ -145,8 +145,9 @@ def main(args):
     end_time = time.time()
 
     len = end_time - start_time
+    avg = len / num if num > 0 else "-"
 
-    print(f"REPORT Converted all {num} files in {len} time; average time per file: {len / num}")
+    print(f"REPORT Converted all {num} files in {len} time; average time per file: {avg}")
         
 
 if __name__ == "__main__":
