@@ -111,6 +111,7 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
     paths = sorted([os.path.join(dir_path, src_file)
                     for src_file in os.listdir(dir_path)
                     if isfile(os.path.join(dir_path, src_file))])
+    count = 0
 
     for i, path in enumerate(paths):
         if acc is not None and i % acc.num_processes == acc.local_process_index:
@@ -119,6 +120,7 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
             if os.path.exists(output_path):
                 print(f"REPORT Skipping {path}, output {output_path} already exists")
             else:
+                count += 1
                 try:
                     convert_and_save_file(path, tgt_path, params, proc_idx=acc.local_process_index)
                 except:
