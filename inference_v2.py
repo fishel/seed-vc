@@ -84,7 +84,7 @@ def convert_voice_v2(source_audio_path, target_audio_path, args):
 
 
 def get_output_path(src, tgt, dir):
-    filename = f"{src}_vcv2_{tgt}.wav"
+    filename = f"{src}.wav"
     output_path = os.path.join(dir, filename)
     return output_path
 
