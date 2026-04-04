@@ -126,7 +126,7 @@ def convert_and_save_dir(dir_path, tgt_path, params, acc=None):
                 except:
                     print(f"REPORT Caught an exception on {path}, skipping")
 
-    return len(paths)
+    return count
 
 
 def main(args):
