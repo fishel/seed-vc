@@ -1,6 +1,6 @@
 # Livonian Seed-VC
 
-TL;DR: copy of [https://github.com/plachtaa/seed-vc
+TL;DR: copy of https://github.com/plachtaa/seed-vc
 
 To run voice conversion install the requirements:
 
